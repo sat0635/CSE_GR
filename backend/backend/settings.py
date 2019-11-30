@@ -93,8 +93,12 @@ DATABASES = {
         'USER': 'root', #mysql user
         'PASSWORD': '1234', #mysql user password
         'HOST': 'localhost',#현재 아이피 주소
-        'PORT': '3306' #mysql 포트번호
-
+        'PORT': '3306', #mysql 포트번호
+	'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
+            'use_unicode': True,
+        },
     }
 }
 
@@ -116,15 +120,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-CORS_ORIGIN_WHITELIST = (
-    'http://34.97.49.139:3000',
-)
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
 TIME_ZONE = 'Asia/Seoul'
 
