@@ -17,7 +17,7 @@ def GetExcel(req):
             return HttpResponse('File Uploaded')
     return HttpResponse('Failed to Upload File')
 
-def SendGr(request,userEmail):
+def SendSubject(request,userEmail):
 	dataList=[]
 	queryset = Subject.objects.filter(USEREMAIL=userEmail)
 	dataClass={}
@@ -40,5 +40,37 @@ def SendGr(request,userEmail):
 	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
 
-	
+def SendNonSubject(request, userEmail):
+	dataList=[]
+	queryset = Gr.objects.filter(USEREMAIL=userEmail)
+	trackNonSubject=CSEIntenCoNonSubject.objects.all()
+	userNonSub={}
+	for row in queryset:
+		data=row.CONTENT.split(":")
+		userNonSub[data[0]]=data[1]
+	for row in trackNonSubject:
+		dataDict={}
+		if row.TITLE == "영어":
+			#유저의 영어 종류  가져오기
+			ENGClass=userNonSub[row.TITLE].split(",")[0]
+			ENGs=row.CONTENT.split(",")
+			ENGGrade=""
+			#졸업요건의 영어종류 찾기
+			for ENG in ENGs:
+				print(ENGClass,ENG.split(":")[0])
+				if ENG.split(":")[0] == ENGClass:
+					ENGGrade=ENG.split(":")[1]
+					break
+			dataDict["CONTENT"]=row.TITLE+":"+ userNonSub[row.TITLE].split(",")[1]+","+str(ENGGrade)
+		else:
+			if row.TITLE  in userNonSub	:
+				dataDict["CONTENT"]=row.TITLE+":"+userNonSub[row.TITLE]+","+row.CONTENT
+			else:
+				dataDict["CONTENT"]=row.TITLE+":"+"N"+","+row.CONTENT
+		dataList.append(dataDict)
+		
+
+
+	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
+	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
 

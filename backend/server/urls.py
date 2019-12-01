@@ -4,5 +4,6 @@ from . import views
 
 urlpatterns = [
 	path('excel/', views.GetExcel),
-	path('gr/<userEmail>/', views.SendGr),
+	path('subject/<userEmail>/', views.SendSubject),
+	path('nonsubject/<userEmail>/',views.SendNonSubject),
 ]
