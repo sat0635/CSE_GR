@@ -52,25 +52,80 @@ def SendNonSubject(request, userEmail):
 		dataDict={}
 		if row.TITLE == "영어":
 			#유저의 영어 종류  가져오기
-			ENGClass=userNonSub[row.TITLE].split(",")[0]
-			ENGs=row.CONTENT.split(",")
+			ENGs=[]
 			ENGGrade=""
+			MyENGGrade=""
+			if row.TITLE in userNonSub.keys():
+				ENGClass=userNonSub[row.TITLE].split(",")[0]
+				MyENGGrade=userNonSub[row.TITLE].split(",")[1]
+			else:
+				ENGClass="토익"
+				MyENGGrade="N"
+			ENGs=row.CONTENT.split(",")
+			
+				
 			#졸업요건의 영어종류 찾기
 			for ENG in ENGs:
-				print(ENGClass,ENG.split(":")[0])
 				if ENG.split(":")[0] == ENGClass:
 					ENGGrade=ENG.split(":")[1]
 					break
-			dataDict["CONTENT"]=row.TITLE+":"+ userNonSub[row.TITLE].split(",")[1]+","+str(ENGGrade)
+			dataDict["CONTENT"]=row.TITLE+":"+MyENGGrade+","+str(ENGGrade)
 		else:
-			if row.TITLE  in userNonSub	:
+			if row.TITLE  in userNonSub.keys():
 				dataDict["CONTENT"]=row.TITLE+":"+userNonSub[row.TITLE]+","+row.CONTENT
 			else:
 				dataDict["CONTENT"]=row.TITLE+":"+"N"+","+row.CONTENT
 		dataList.append(dataDict)
 		
 
-
+	for row in dataList:
+		print(row)
 	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
+
+
+def InsertUser(request, userEmail):
+	dataList=[]
+	queryset = User.objects.filter(USEREMAIL=userEmail)
+	if len(queryset) == 0 :
+		User.objects.create(USEREMAIL=userEmail)
+	dataDict={}
+	dataDict["resultValue"]=True
+	dataList.append(dataDict)
+	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
+	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
+
+
+def SendUserInfo(request, userEmail):
+	dataList=[]
+	queryset = User.objects.filter(USEREMAIL=userEmail)
+	
+	for row in queryset:
+		dataDict={}
+		dataDict["major"]=row.MAJOR
+		dataDict["track"]=row.TRACK
+		dataList.append(dataDict)
+
+	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )	
+	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
+
+
+
+
+def UpdateUserInfo(request, userEmail, major, track):
+	dataList=[]
+	user = User.objects.get(USEREMAIL=userEmail)
+	user.MAJOR=major
+	user.TRACK=track
+	user.save()
+
+
+	dataDict={}
+	dataDict["major"]=major
+	dataDict["track"]=track
+	dataList.append(dataDict)
+	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
+	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
+
+
 

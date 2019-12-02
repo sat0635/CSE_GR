@@ -36,3 +36,12 @@ class CSEIntenCoNonSubject(models.Model):
 	def __str__(self):
 		return self.TITLE
 
+
+class User(models.Model):
+	USEREMAIL=models.CharField(max_length=100)
+	STUDENT_NUMBER=models.IntegerField(default=0)
+	MAJOR=models.CharField(max_length=20,default="N")
+	TRACK=models.CharField(max_length=20,default="N")
+	def __str__(self):
+		return self.USEREMAIL
+	
