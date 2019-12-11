@@ -128,4 +128,39 @@ def UpdateUserInfo(request, userEmail, major, track):
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
 
 
+def SendQuestion(request):
+	dataList=[]
+	question=Question.objects.all()
+	
+	for row in question:
+		dataDict={}
+		dataDict["title"]=row.TITLE
+		dataDict["desc"]=row.DESC
+		dataList.append(dataDict)
+	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
+	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
 
+
+def getQuestion(request,userEmail,title,desc):
+	dataList=[]
+	question = Question.objects.create(USEREMAIL=userEmail,TITLE=title,DESC=desc)
+	
+	dataDict={}
+	dataDict["resultValue"]=True
+	dataList.append(dataDict)
+	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
+	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
+
+
+
+def SendFaq(request):
+	dataList=[]
+	question=Question.objects.all()
+
+	for row in question:
+		dataDict={}
+		dataDict["title"]=row.TITLE
+		dataDict["desc"]=row.DESC
+		dataList.append(dataDict)
+	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
+	return HttpResponse(result, content_type=u"application/json; charset=utf-8")

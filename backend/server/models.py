@@ -44,4 +44,13 @@ class User(models.Model):
 	TRACK=models.CharField(max_length=20,default="N")
 	def __str__(self):
 		return self.USEREMAIL
+
+
+class Question(models.Model):
+	USEREMAIL=models.CharField(max_length=100)
+	TITLE=models.CharField(max_length=100)
+	DESC=models.TextField(max_length=1000)
+	def __str__(self):
+		return self.TITLE
+
 	
