@@ -22,26 +22,48 @@ def SendSubject(request,userEmail):
 	user = User.objects.get(USEREMAIL=userEmail)
 	major = user.MAJOR
 	track = user.TRACK
+	studentId=user.STUDENT_ID
+	if int(studentId[:4])<=2009:
+		studentId="2009"
+	elif int(studentId[:4])>=2012:
+		studentId="2012"
+	else:
+		studentId="2010"
 	queryset = Subject.objects.filter(USEREMAIL=userEmail)
 	dataClass={}
-	if major == "심화컴퓨터":
 
+	
+	if major == "심화컴퓨터":
+		studentIdRequirement=CSEIntenCoStudentId.objects.get(STUDENT_ID=studentId[:4])
+		dataClass["TOTAL"]=0
 		dataClass["MAJOR"]=0
 		dataClass["BASEMAJOR"]=0
 		dataClass["ENGINEER_CUL"]=0
 		for row in queryset:
+			dataClass["TOTAL"]+=row.GRADE
 			if row.CLASS=="전공기반":
 				dataClass["BASEMAJOR"]+=row.GRADE
 			elif row.CLASS=="전공":
 				dataClass["MAJOR"]+=row.GRADE
 			elif row.CLASS=="기본소양":
-				dataClass["ENGINEER_CUL"]+=row.GRADE	
+				dataClass["ENGINEER_CUL"]+=row.GRADE
+			
 		for key,value in dataClass.items():
 			dataDict={}
 			dataDict["CATEGORY"]=key
-			dataDict["GRADE"]=value
+			dataDict["GRADE"]=str(value)
+			if key == "BASEMAJOR":
+				dataDict["GRADE"]+=":"+str(studentIdRequirement.BASEMAJOR_GRADE)
+			elif key == "MAJOR":
+				dataDict["GRADE"]+=":"+str(studentIdRequirement.MAJOR_GRADE)
+			elif key == "DESIGN":
+				dataDict["GRADE"]+=":"+str(studentIdRequirement.DESIGN_GRADE)
+			elif key == "ENGINEER_CUL":
+				dataDict["GRADE"]+=":"+str(studentIdRequirement.ENGINEER_CUL_GRADE)
+			elif key == "TOTAL":
+				dataDict["GRADE"]+=":"+str(studentIdRequirement.TOTAL_GRADE)
 			dataList.append(dataDict)
-	else:
+	elif major == "글로벌SW융합":
 		dataClass["SW_MAJOR"]=0
 		dataClass["SW_CUL"]=0
 		for row in queryset:
@@ -52,9 +74,12 @@ def SendSubject(request,userEmail):
 		for key,value in dataClass.items():
 			dataDict={}
 			dataDict["CATEGORY"]=key
-			dataDict["GRADE"]=value
+			dataDict["GRADE"]=str(value)
+			if key == "SW_MAJOR":
+				dataDict["GRADE"]+=":"+"51"
+			elif key == "SW_CUL":
+				dataDict["GRADE"]+=":"+"24~42"	
 			dataList.append(dataDict)
-	print(dataList)
 		
 	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
@@ -159,9 +184,9 @@ def UpdateUserInfo(request, userEmail, major, track):
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
 
 
-def SendQuestion(request):
+def SendQuestion(request,userEmail):
 	dataList=[]
-	question=Question.objects.all()
+	question=Question.objects.filter(USEREMAIL=userEmail)
 	
 	for row in question:
 		dataDict={}
@@ -186,13 +211,14 @@ def getQuestion(request,userEmail,title,desc):
 
 def SendFaq(request):
 	dataList=[]
-	question=Question.objects.all()
+	question=Question.objects.filter(ISFAQ=True)
 
 	for row in question:
 		dataDict={}
 		dataDict["title"]=row.TITLE
 		dataDict["desc"]=row.DESC
 		dataList.append(dataDict)
+	
 	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
 
@@ -202,7 +228,9 @@ def UpdateUserNonSubject(request, userEmail, category, content):
 	if len(gr) == 0 :
 		Gr.objects.create(USEREMAIL=userEmail,CATEGORY=category,CONTENT=content)
 	else:
-		gr.CONTENT=content
+		uGr=Gr.objects.get(USEREMAIL=userEmail,CATEGORY=category)
+		uGr.CONTENT=content
+		uGr.save()
 	
 			
 	dataDict={}
@@ -211,3 +239,35 @@ def UpdateUserNonSubject(request, userEmail, category, content):
 
 	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")	
+
+def SendMySubject(request,userEmail):
+	userSubject = Subject.objects.filter(USEREMAIL=userEmail)
+	user=User.objects.get(USEREMAIL=userEmail)
+	major=user.MAJOR
+	userSubjectDict={}
+	for row in userSubject:
+		userSubjectDict[row.TITLE]=1
+	dataList=[]
+	if major == "심화컴퓨터":
+		subject=CSEIntenCoSubject.objects.all()
+	elif major == "글로벌SW융합":
+		subject=GlobalSWCoSubject.objects.all()
+	for row in subject:
+		if row.TITLE in userSubjectDict.keys():
+			dataDict={}
+			dataDict["CATEGORY"]=row.CLASS
+			dataDict["CONTENT"]=row.TITLE+",Y"
+			dataList.append(dataDict)
+		else:
+			dataDict={}
+			dataDict["CATEGORY"]=row.CLASS
+			dataDict["CONTENT"]=row.TITLE+",N"
+			dataList.append(dataDict)
+
+	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
+	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
+
+				
+			
+		
+

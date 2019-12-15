@@ -21,6 +21,18 @@ class Gr(models.Model):
 	def __str__(self):
 		return self.CATEGORY
 
+class CSEIntenCoStudentId(models.Model):
+	STUDENT_ID=models.CharField(max_length=20)
+	TOTAL_GRADE=models.IntegerField(default=0)
+	ENGINEER_CUL_GRADE=models.IntegerField(default=0)
+	BASEMAJOR_GRADE=models.IntegerField(default=0)
+	MAJOR_GRADE=models.IntegerField(default=0)
+	DESIGN_GRADE=models.IntegerField(default=0)
+	ABEEK_GRADE=models.IntegerField(default=0)
+	ENG_GRADE=models.CharField(max_length=20,default="N")
+	INTERN_GRADE=models.CharField(max_length=20,default="N")
+	def __str__(self):
+		return self.STUDENT_ID	
 
 class CSEIntenCoSubject(models.Model):
 	TITLE=models.CharField(max_length=20)
@@ -28,6 +40,7 @@ class CSEIntenCoSubject(models.Model):
 	CLASS=models.CharField(max_length=20)
 	GRADE=models.IntegerField(default=0)
 	ISDESIGN=models.BooleanField(default=False)
+	ISESSENTIAL=models.BooleanField(default=False)
 	def __str__(self):
 		return self.TITLE
 
@@ -42,6 +55,9 @@ class GlobalSWCoSubject(models.Model):
 	CODE=models.CharField(max_length=20)
 	CLASS=models.CharField(max_length=20)
 	GRADE=models.IntegerField(default=0)
+	ISDESIGN=models.BooleanField(default=False)
+	ISESSENTIAL=models.BooleanField(default=False)
+
 	def __str__(self):
 		return self.TITLE
 
@@ -55,6 +71,7 @@ class GlobalSWCoNonSubject(models.Model):
 
 class User(models.Model):
 	USEREMAIL=models.CharField(max_length=100)
+	STUDENT_ID=models.CharField(max_length=100,default="N")
 	STUDENT_NUMBER=models.IntegerField(default=0)
 	MAJOR=models.CharField(max_length=20,default="N")
 	TRACK=models.CharField(max_length=20,default="N")
@@ -66,7 +83,7 @@ class Question(models.Model):
 	USEREMAIL=models.CharField(max_length=100)
 	TITLE=models.CharField(max_length=100)
 	DESC=models.TextField(max_length=1000)
+	ISFAQ=models.BooleanField(default=False)
 	def __str__(self):
 		return self.TITLE
-
 	
