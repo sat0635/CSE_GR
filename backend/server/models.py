@@ -16,9 +16,10 @@ class Subject(models.Model):
 
 class Gr(models.Model):
 	USEREMAIL=models.CharField(max_length=20)
-	CONTENT=models.CharField(max_length=100)
+	CATEGORY=models.CharField(max_length=100,default = "N")
+	CONTENT=models.CharField(max_length=100,default="N")
 	def __str__(self):
-		return self.CONTENT
+		return self.CATEGORY
 
 
 class CSEIntenCoSubject(models.Model):
@@ -32,6 +33,21 @@ class CSEIntenCoSubject(models.Model):
 
 class CSEIntenCoNonSubject(models.Model):
 	TITLE=models.CharField(max_length=20)
+	CONTENT=models.CharField(max_length=100)
+	def __str__(self):
+		return self.TITLE
+
+class GlobalSWCoSubject(models.Model):
+	TITLE=models.CharField(max_length=20)
+	CODE=models.CharField(max_length=20)
+	CLASS=models.CharField(max_length=20)
+	GRADE=models.IntegerField(default=0)
+	def __str__(self):
+		return self.TITLE
+
+class GlobalSWCoNonSubject(models.Model):
+	TITLE=models.CharField(max_length=20)
+	TRACK=models.CharField(max_length=20,default="N")
 	CONTENT=models.CharField(max_length=100)
 	def __str__(self):
 		return self.TITLE

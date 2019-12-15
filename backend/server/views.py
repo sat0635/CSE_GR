@@ -19,35 +19,62 @@ def GetExcel(req):
 
 def SendSubject(request,userEmail):
 	dataList=[]
+	user = User.objects.get(USEREMAIL=userEmail)
+	major = user.MAJOR
+	track = user.TRACK
 	queryset = Subject.objects.filter(USEREMAIL=userEmail)
 	dataClass={}
-	dataClass["MAJOR"]=0
-	dataClass["BASEMAJOR"]=0
-	dataClass["ENGINEER_CUL"]=0
-	ENGINEER_CUL=0
-	for row in queryset:
-		if row.CLASS=="전공기반":
-			dataClass["BASEMAJOR"]+=row.GRADE
-		elif row.CLASS=="전공":
-			dataClass["MAJOR"]+=row.GRADE
-		elif row.CLASS=="기본소양":
-			dataClass["ENGINEER_CUL"]+=row.GRADE	
-	for key,value in dataClass.items():
-		dataDict={}
-		dataDict["CONTENT"]=key+":"+str(value)
-		dataList.append(dataDict)
+	if major == "심화컴퓨터":
 
+		dataClass["MAJOR"]=0
+		dataClass["BASEMAJOR"]=0
+		dataClass["ENGINEER_CUL"]=0
+		for row in queryset:
+			if row.CLASS=="전공기반":
+				dataClass["BASEMAJOR"]+=row.GRADE
+			elif row.CLASS=="전공":
+				dataClass["MAJOR"]+=row.GRADE
+			elif row.CLASS=="기본소양":
+				dataClass["ENGINEER_CUL"]+=row.GRADE	
+		for key,value in dataClass.items():
+			dataDict={}
+			dataDict["CATEGORY"]=key
+			dataDict["GRADE"]=value
+			dataList.append(dataDict)
+	else:
+		dataClass["SW_MAJOR"]=0
+		dataClass["SW_CUL"]=0
+		for row in queryset:
+			if row.CLASS=="전공":
+				dataClass["SW_MAJOR"]+=row.GRADE
+			elif row.CLASS=="교양" or row.CLASS == "기본소양":
+				dataClass["SW_CUL"]+=row.GRADE
+		for key,value in dataClass.items():
+			dataDict={}
+			dataDict["CATEGORY"]=key
+			dataDict["GRADE"]=value
+			dataList.append(dataDict)
+	print(dataList)
+		
 	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
 
 def SendNonSubject(request, userEmail):
 	dataList=[]
+	user = User.objects.get(USEREMAIL=userEmail)
+	major = user.MAJOR
+	track = user.TRACK
+	#유저의 비 교과목 가져오기
 	queryset = Gr.objects.filter(USEREMAIL=userEmail)
 	trackNonSubject=CSEIntenCoNonSubject.objects.all()
+	if major == "심화컴퓨터":
+		trackNonSubject=CSEIntenCoNonSubject.objects.all()
+	elif major == "글로벌SW융합":
+		trackNonSubject=GlobalSWCoNonSubject.objects.filter(TRACK=track)
+	
 	userNonSub={}
 	for row in queryset:
-		data=row.CONTENT.split(":")
-		userNonSub[data[0]]=data[1]
+		userNonSub[row.CATEGORY]=row.CONTENT
 	for row in trackNonSubject:
 		dataDict={}
 		if row.TITLE == "영어":
@@ -69,12 +96,15 @@ def SendNonSubject(request, userEmail):
 				if ENG.split(":")[0] == ENGClass:
 					ENGGrade=ENG.split(":")[1]
 					break
-			dataDict["CONTENT"]=row.TITLE+":"+MyENGGrade+","+str(ENGGrade)
+			dataDict["CATEGORY"]=row.TITLE
+			dataDict["CONTENT"]=MyENGGrade+","+str(ENGGrade)
 		else:
 			if row.TITLE  in userNonSub.keys():
-				dataDict["CONTENT"]=row.TITLE+":"+userNonSub[row.TITLE]+","+row.CONTENT
+				dataDict["CATEGORY"]=row.TITLE
+				dataDict["CONTENT"]=userNonSub[row.TITLE]+","+row.CONTENT
 			else:
-				dataDict["CONTENT"]=row.TITLE+":"+"N"+","+row.CONTENT
+				dataDict["CATEGORY"]=row.TITLE
+				dataDict["CONTENT"]="N"+","+row.CONTENT
 		dataList.append(dataDict)
 		
 
@@ -119,11 +149,12 @@ def UpdateUserInfo(request, userEmail, major, track):
 	user.TRACK=track
 	user.save()
 
-
+	
 	dataDict={}
 	dataDict["major"]=major
 	dataDict["track"]=track
 	dataList.append(dataDict)
+	print(dataList)
 	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
 
@@ -164,3 +195,19 @@ def SendFaq(request):
 		dataList.append(dataDict)
 	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
 	return HttpResponse(result, content_type=u"application/json; charset=utf-8")
+
+def UpdateUserNonSubject(request, userEmail, category, content):
+	dataList=[]
+	gr = Gr.objects.filter(USEREMAIL=userEmail,CATEGORY=category)
+	if len(gr) == 0 :
+		Gr.objects.create(USEREMAIL=userEmail,CATEGORY=category,CONTENT=content)
+	else:
+		gr.CONTENT=content
+	
+			
+	dataDict={}
+	dataDict["resultValue"]=1
+	dataList.append(dataDict)
+
+	result=(json.dumps(dataList, ensure_ascii=False).encode('utf8') )
+	return HttpResponse(result, content_type=u"application/json; charset=utf-8")	

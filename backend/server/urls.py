@@ -12,4 +12,5 @@ urlpatterns = [
 	path('qa/',views.SendQuestion),
 	path('question/<userEmail>/<title>/<desc>/', views.getQuestion),
 	path('faq/', views.SendFaq),
+	path('usernonsubjectu/<userEmail>/<category>/<content>/', views.UpdateUserNonSubject),
 ]
